@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -57,4 +58,26 @@ public class TodoServlet extends HttpServlet {
 		out.println("]");
 		out.flush();
 	}
+
+	@Override
+	protected void doPut(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("application/json");
+		int id = Integer.parseInt(request.getParameter("id"));
+		Optional<Todo> optionalTodo = todoService.getTodoById(id);
+
+		if (optionalTodo.isPresent()) {
+			Todo todoToUpdate = optionalTodo.get();
+			todoToUpdate.setCompleted(true); // Mark as completed
+			PrintWriter out = response.getWriter();
+			out.println("{\"message\":\"Todo updated successfully\", \"id\":" + todoToUpdate.getId() + "}");
+			out.flush();
+		} else {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			PrintWriter out = response.getWriter();
+			out.println("{\"message\":\"Todo not found\"}");
+			out.flush();
+		}
+	}
+
 }
